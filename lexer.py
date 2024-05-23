@@ -133,7 +133,7 @@ def op_lexer(string, white, operators):
 
 
 
-def var_lexer(string, letters, digits, white, keys, operators, reserved, punctuation_num):
+def var_lexer(string, letters, digits, white, keys, open_keys, operators, reserved, punctuation_num):
     table = [   
     #  lett _ 0-9 = esp pu otro
         [1, 1, 3, 3, 3, 3, 3],
@@ -166,6 +166,8 @@ def var_lexer(string, letters, digits, white, keys, operators, reserved, punctua
         if state == 2:
             if lexeme in reserved:
                 return [string[i:], lexeme, 'RESERVED']
+            elif c in open_keys:
+                return [string[i:], lexeme, 'FUNCTION']
             return [string[i:], lexeme, 'VARIABLE']
         elif state == 3:
             lexeme += c
@@ -310,7 +312,7 @@ def lexer(file_relative_path):
             string = restante
 
         elif string[0] in letters or string[0] == "_":
-            restante, lexeme, denom = var_lexer(string, letters, digits, white, keys, operators, reserved, punctuation_num)
+            restante, lexeme, denom = var_lexer(string, letters, digits, white, keys, open_keys, operators, reserved, punctuation_num)
             results.append([lexeme, denom])
             # print(lexeme, denom)
             string = restante
