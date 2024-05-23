@@ -1,4 +1,5 @@
 import csv
+from LexerToHTML import highlighter
 
 def num_lexer(string, white, digits, scientific, operators, punctuation_num, close_keys):
 
@@ -77,7 +78,10 @@ def op_lexer(string, white, operators):
         '/': 'DIVISION',
         '=': 'ASSIGNMENT',
         '%': 'MODULE',
+        '>': 'GREATER',
+        '<': 'LESS',
     }
+
         
     # flags
     state = 0
@@ -129,11 +133,11 @@ def op_lexer(string, white, operators):
 
 
 
-def var_lexer(string, letters, digits, white, keys, operators, reserved):
+def var_lexer(string, letters, digits, white, keys, operators, reserved, punctuation_num):
     table = [   
-    #  lett _ 0-9 = esp otro
-        [1, 3, 3, 3, 3, 3],
-        [1, 1, 1, 2, 2, 3]
+    #  lett _ 0-9 = esp pu otro
+        [1, 1, 3, 3, 3, 3, 3],
+        [1, 1, 1, 2, 2, 2, 3]
     ]
 
     state = 0
@@ -151,10 +155,11 @@ def var_lexer(string, letters, digits, white, keys, operators, reserved):
         elif c == "=":
             col = 3
         elif c in white or c in keys or c in operators:
-        # elif c in white:
             col = 4
-        else:
+        elif c in punctuation_num:
             col = 5
+        else:
+            col = 4
 
         state = table[state][col]
 
@@ -173,14 +178,17 @@ def var_lexer(string, letters, digits, white, keys, operators, reserved):
 
 
 
-def string_lexer(string, white, operators):
+def string_lexer(string):
 
     table = [
       #  "  '  \n  otro    
         [1, 2, 4, 4],
-        [3, 1, 4, 1],
-        [2, 3, 4, 2],
+        [3, 1, 1, 1],
+        [2, 3, 2, 2],
     ]
+
+    state = 0
+    lexeme = ''
 
     for i in range(len(string)):
         c = string[i]
@@ -191,15 +199,14 @@ def string_lexer(string, white, operators):
             col = 1
         elif c == "\n":
             col = 2
-        elif c == "=":
-            col = 3
         else:
-            col = 4
+            col = 3
 
         state = table[state][col]
 
         if state == 3:
-            return [string[i:], lexeme, 'STRING']
+            lexeme += c
+            return [string[i+1:], lexeme, 'STRING']
         elif state == 4:
             lexeme += c
             return [string[i+1:], lexeme, 'ERROR']
@@ -232,7 +239,7 @@ def lexer(file_relative_path):
 
     # definiciones
     operators = "+-*/=<>%"
-    punctuation_num = ",;:"
+    punctuation_num = ".,;:"
     open_keys = "([{"
     close_keys = ")]}"
     keys = open_keys + close_keys
@@ -267,7 +274,7 @@ def lexer(file_relative_path):
                 ]
 
 
-    # flags
+
     results = []
     while(len(string) > 0):
         if string[0] == " ":
@@ -286,25 +293,29 @@ def lexer(file_relative_path):
             results.append([string[0], "PUNCTUATION"])
             string = string[1:]
             
-
         elif string[0] in keys:
             results.append([string[0], "KEY"])
             string = string[1:]
 
-        
+        elif string[0] == '\"' or string[0] == "\'":
+            restante, lexeme, denom = string_lexer(string)
+            results.append([lexeme, denom])
+            # print(lexeme, denom)
+            string = restante
+
         elif string[0] in operators or string[0] == "#":
             restante, lexeme, denom = op_lexer(string, white, operators)
             results.append([lexeme, denom])
             # print(lexeme, denom)
             string = restante
 
-        elif string[0] in letters:
-            restante, lexeme, denom = var_lexer(string, letters, digits, white, keys, operators, reserved)
+        elif string[0] in letters or string[0] == "_":
+            restante, lexeme, denom = var_lexer(string, letters, digits, white, keys, operators, reserved, punctuation_num)
             results.append([lexeme, denom])
             # print(lexeme, denom)
             string = restante
 
-        else:
+        elif string[0] in digits:
             restante, lexeme, denom = num_lexer(string, white, digits, scientific, operators, punctuation_num, close_keys)
             results.append([lexeme, denom])
             # print(lexeme, denom)
@@ -313,14 +324,14 @@ def lexer(file_relative_path):
     print("results = [")
     for r in results:
         print(f"{r},")
-
     print("]")
+
+    highlighter(results)
+    # return results
     
 
 
 def main():
-    # num_prueba = "-123+4903.456 23490/202 = 444 \n asign = -123.456e-789 \t 3456 // esto es un comentario \n 333"
-
     lexer("file.py")
 
 

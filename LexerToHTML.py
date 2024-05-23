@@ -1,64 +1,74 @@
 # Diccionario de los colores por clase de token
 colors = {
-    "error": "red",
-    "numeros": "blue",
-    "operadores": "orange",
-    "variables": "purple",
-    "string": "green",
-    "comentarios": "gray",
-    "llaves_corchetes": "brown",
-    "formato": "black"
-}
+        "error": "red",
+        "numeros": "blue",
+        "operadores": "orange",
+        "variables": "purple",
+        "string": "green",
+        "comentarios": "gray",
+        "llaves_corchetes": "brown",
+        "formato": "black"
+    }
 
-# Diccionario con los colores de cada tipo de token
-tipo_colores = {
-    "ERROR": colors["error"],
-    "INTEGER": colors["numeros"],
-    "REAL": colors["numeros"],
-    "ADDITION": colors["operadores"],
-    "SUBTRACTION": colors["operadores"],
-    "MULTIPLICATION": colors["operadores"],
-    "DIVISION": colors["operadores"],
-    "ASSIGNMENT": colors["operadores"],
-    "MODULE": colors["operadores"],
-    "INTEGER_DIVISION": colors["operadores"],
-    "POWER": colors["operadores"],
-    "RESERVED": colors["variables"],
-    "STRING": colors["string"],
-    "COMMENT": colors["comentarios"],
-    "KEY": colors["llaves_corchetes"],
-    "PUNCTUATION": colors["llaves_corchetes"],
-    "LINE_JUMP": colors["formato"],
-    "SPACE": colors["formato"],
-    "TAB": colors["formato"]
-}
+    # Diccionario con los colores de cada type de token
+color_types = {
+        "ERROR": colors["error"],
+        "INTEGER": colors["numeros"],
+        "REAL": colors["numeros"],
+        "ADDITION": colors["operadores"],
+        "SUBTRACTION": colors["operadores"],
+        "MULTIPLICATION": colors["operadores"],
+        "DIVISION": colors["operadores"],
+        "ASSIGNMENT": colors["operadores"],
+        "MODULE": colors["operadores"],
+        "GREATER": colors["operadores"],
+        "SMALLER": colors["operadores"],
+        "INTEGER_DIVISION": colors["operadores"],
+        "POWER": colors["operadores"],
+        "RESERVED": colors["variables"],
+        "STRING": colors["string"],
+        "COMMENT": colors["comentarios"],
+        "KEY": colors["llaves_corchetes"],
+        "PUNCTUATION": colors["llaves_corchetes"],
+        "LINE_JUMP": colors["formato"],
+        "SPACE": colors["formato"],
+        "TAB": colors["formato"]
+    }
+
+
 
 # Función para generar la guía de colores en el HTML
-def guiaColores(colors):
-    guia_html = "<div><h2>Guía de Colores</h2><ul>"
-    for tipo, color in colors.items():
-        guia_html += f'<li><span style="color: {color};">{tipo.capitalize()}</span>: {tipo.capitalize()}</li>'
-    guia_html += "</ul></div><hr>"
-    return guia_html
+def color_guide(colors):
+    html_guide = "<div><h2>Guía de Colores</h2><ul>"
+    for type, color in colors.items():
+        html_guide += f'<li><span style="color: {color};">{type.capitalize()}</span>: {type.capitalize()}</li>'
+    html_guide += "</ul></div><hr>"
+    return html_guide
 
 # Función para generar el HTML
-def generarHtml(results, tipo_colores):
-    guia_html = guiaColores(colors)
+def html_generator(results, color_types, output_file):
+    html_guide = color_guide(colors)
     html_content = "<!DOCTYPE html>\n<html>\n<head>\n<title>Highlighted Code</title>\n</head>\n<body>\n"
-    html_content += guia_html
+    html_content += html_guide
     html_content += "<pre>\n"
     
-    for text, tipo in results:
-        color = tipo_colores.get(tipo, "black") 
-        if tipo == "LINE_JUMP":
+    for text, type in results:
+        color = color_types.get(type, "black") 
+        if type == "LINE_JUMP":
             html_content += "<br>"
-        elif tipo == "SPACE":
+        elif type == "SPACE":
             html_content += "&nbsp;"
         else:
             html_content += f'<span style="color: {color};">{text}</span>'
     
     html_content += "\n</pre></body>\n</html>"
-    return html_content
+    # return html_content
+
+
+    # Se guarda el HTML en un archivo
+    with open(output_file, 'w') as file:
+        file.write(html_content)
+
 
 # Resultados a mano para probar el generador de HTML
 results = [
@@ -295,10 +305,16 @@ results = [
     ['\n', 'LINE_JUMP'],
 ]
 
-# Se genera el HTML
-html_resultado = generarHtml(results, tipo_colores)
+def highlighter(results):
+    html_generator(results, color_types, "SintaxisHighlighter.html")
 
-# Se guarda el HTML en un archivo
-file_path = 'SintaxisHighlighter.html'
-with open(file_path, 'w') as file:
-    file.write(html_resultado)
+
+def main():
+    # Se genera el HTML con al función
+    highlighter(results)
+
+
+
+
+if __name__ == "__main__":
+    main()
