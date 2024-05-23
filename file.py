@@ -1,4 +1,4 @@
-# <regresa ek mayor de a o b
+# regresa el mayor de a o b
 import random
 
 
@@ -30,8 +30,8 @@ class MiClase:
   def __init__(self, valor):
     self.valor = valor
 
-def metodo_clase(self):
-  return self.valor
+  def metodo_clase(self):
+    return self.valor
 
 obj = MiClase("Hola")
-print(obj.metodo())
+print(obj.metodo_clase())
