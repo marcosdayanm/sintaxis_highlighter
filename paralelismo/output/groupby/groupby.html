@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"
+Provide the groupby split-apply-combine paradigm. Define the GroupBy
+class providing the base-class of operations.
+
+The SeriesGroupBy and DataFrameGroupBy sub-class
+(defined in pandas.core.groupby.generic)
+expose these user-facing objects to provide specific functionality.
+"</span><span style="color: green;">""</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">collections</span><span style="color: brown;">.</span><span style="color: navy;">abc</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Hashable</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Iterable</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Iterator</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Mapping</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Sequence</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">datetime</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">functools</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">partial</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">wraps</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">textwrap</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">dedent</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Callable</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Literal</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TypeVar</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Union</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">cast</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">final</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">overload</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">warnings</span><br><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">np</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Timestamp</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">lib</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">algos</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">rank_1d</span><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">groupby</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">libgroupby</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">NA</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">AnyArrayLike</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ArrayLike</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">DtypeObj</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">IndexLabel</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">IntervalClosedType</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">NDFrameT</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">PositionalIndexer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">RandomState</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">npt</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">compat</span><span style="color: brown;">.</span><span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">function</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">nv</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">errors</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">AbstractMethodError</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">DataError</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">_decorators</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Appender</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Substitution</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">cache_readonly</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">_exceptions</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">find_stack_level</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">cast</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">coerce_indexer_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ensure_dtype_can_hold_na</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">common</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_bool_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_float_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_hashable</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_integer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_integer_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_list_like</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_numeric_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_object_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_scalar</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">needs_i8_conversion</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">pandas_dtype</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">isna</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">na_value_for_dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">notna</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">algorithms</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">sample</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">_numba</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">executor</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">arrays</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ArrowExtensionArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">BaseMaskedArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ExtensionArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">FloatingArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">IntegerArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">SparseArray</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">arrays</span><span style="color: brown;">.</span><span style="color: navy;">string_</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">StringDtype</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">arrays</span><span style="color: brown;">.</span><span style="color: navy;">string_arrow</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ArrowStringArray</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ArrowStringArrayNumpySemantics</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">base</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">PandasObject</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">SelectionMixin</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">common</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">com</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">frame</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">DataFrame</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">generic</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">NDFrame</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">groupby</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">base</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">numba_</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ops</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">groupby</span><span style="color: brown;">.</span><span style="color: navy;">grouper</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">get_grouper</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">groupby</span><span style="color: brown;">.</span><span style="color: navy;">indexing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">GroupByIndexingMixin</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">GroupByNthSelector</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">indexes</span><span style="color: brown;">.</span><span style="color: navy;">api</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Index</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">MultiIndex</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">RangeIndex</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">default_index</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">internals</span><span style="color: brown;">.</span><span style="color: navy;">blocks</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">ensure_block_shape</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">series</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">Series</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">sorting</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">get_group_index_sorter</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">numba_</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">get_jit_arguments</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">maybe_use_numba</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">if</span>&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">tslibs</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">BaseOffset</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Any</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Concatenate</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">P</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Self</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">T</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">indexers</span><span style="color: brown;">.</span><span style="color: navy;">objects</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">BaseIndexer</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">resample</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">Resampler</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">window</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ExpandingGroupby</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ExponentialMovingWindowGroupby</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">RollingGroupby</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br><span style="color: navy;">_common_see_also</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+        See Also
+        --------
+        Series.%(name)s : Apply a function %(name)s to a Series.
+        DataFrame.%(name)s : Apply a function %(name)s
+            to each row or column of a DataFrame.
+"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_groupby_agg_method_template</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Compute {fname} of group values.
+
+Parameters
+----------
+numeric_only : bool, default {no}
+    Include only float, int, boolean columns.
+
+    .. versionchanged:: 2.0.0
+
+        numeric_only no longer accepts ``None``.
+
+min_count : int, default {mc}
+    The required number of valid values to perform the operation. If fewer
+    than ``min_count`` non-NA values are present the result will be NA.
+
+Returns
+-------
+Series or DataFrame
+    Computed {fname} of values within each group.
+
+Examples
+--------
+{example}
+"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_groupby_agg_method_engine_template</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Compute {fname} of group values.
+
+Parameters
+----------
+numeric_only : bool, default {no}
+    Include only float, int, boolean columns.
+
+    .. versionchanged:: 2.0.0
+
+        numeric_only no longer accepts ``None``.
+
+min_count : int, default {mc}
+    The required number of valid values to perform the operation. If fewer
+    than ``min_count`` non-NA values are present the result will be NA.
+
+engine : str, default None {e}
+    * ``'cython'`` : Runs rolling apply through C-extensions from cython.
+    * ``'numba'`` : Runs rolling apply through JIT compiled code from numba.
+        Only available when ``raw`` is set to ``True``.
+    * ``None`` : Defaults to ``'cython'`` or globally setting ``compute.use_numba``
+
+engine_kwargs : dict, default None {ek}
+    * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+    * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+        and ``parallel`` dictionary keys. The values must either be ``True`` or
+        ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+        ``{{'nopython': True, 'nogil': False, 'parallel': False}}`` and will be
+        applied to both the ``func`` and the ``apply`` groupby aggregation.
+
+Returns
+-------
+Series or DataFrame
+    Computed {fname} of values within each group.
+
+Examples
+--------
+{example}
+"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_pipe_template</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Apply a ``func`` with arguments to this %(klass)s object and return its result.
+
+Use `.pipe` when you want to improve readability by chaining together
+functions that expect Series, DataFrames, GroupBy or Resampler objects.
+Instead of writing
+
+>>> h = lambda x, arg2, arg3: x + 1 - arg2 * arg3
+>>> g = lambda x, arg1: x * 5 / arg1
+>>> f = lambda x: x ** 4
+>>> df = pd.DataFrame([["</span><span style="color: navy;">a</span><span style="color: green;">", 4], ["</span><span style="color: navy;">b</span><span style="color: green;">", 5]], columns=["</span><span style="color: navy;">group</span><span style="color: green;">", "</span><span style="color: navy;">value</span><span style="color: green;">"])
+>>> h(g(f(df.groupby('group')), arg1=1), arg2=2, arg3=3)  # doctest: +SKIP
+
+You can write
+
+>>> (df.groupby('group')
+...    .pipe(f)
+...    .pipe(g, arg1=1)
+...    .pipe(h, arg2=2, arg3=3))  # doctest: +SKIP
+
+which is much more readable.
+
+Parameters
+----------
+func : callable or tuple of (callable, str)
+    Function to apply to this %(klass)s object or, alternatively,
+    a `(callable, data_keyword)` tuple where `data_keyword` is a
+    string indicating the keyword of `callable` that expects the
+    %(klass)s object.
+*args : iterable, optional
+       Positional arguments passed into `func`.
+**kwargs : dict, optional
+         A dictionary of keyword arguments passed into `func`.
+
+Returns
+-------
+%(klass)s
+    The original object with the function `func` applied.
+
+See Also
+--------
+Series.pipe : Apply a function with arguments to a series.
+DataFrame.pipe: Apply a function with arguments to a dataframe.
+apply : Apply function to each group instead of to the
+    full %(klass)s object.
+
+Notes
+-----
+See more `here
+<https://pandas.pydata.org/pandas-docs/stable/user_guide/groupby.html#piping-function-calls>`_
+
+Examples
+--------
+%(examples)s
+"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_transform_template</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Call function producing a same-indexed %(klass)s on each group.
+
+Returns a %(klass)s having the same indexes as the original object
+filled with the transformed values.
+
+Parameters
+----------
+func : function, str
+    Function to apply to each group. See the Notes section below for requirements.
+
+    Accepted inputs are:
+
+    - String
+    - Python function
+    - Numba JIT function with ``engine='numba'`` specified.
+
+    Only passing a single function is supported with this engine.
+    If the ``'numba'`` engine is chosen, the function must be
+    a user defined function with ``values`` and ``index`` as the
+    first and second arguments respectively in the function signature.
+    Each group's index will be passed to the user defined function
+    and optionally available for use.
+
+    If a string is chosen, then it needs to be the name
+    of the groupby method you want to use.
+*args
+    Positional arguments to pass to func.
+engine : str, default None
+    * ``'cython'`` : Runs the function through C-extensions from cython.
+    * ``'numba'`` : Runs the function through JIT compiled code from numba.
+    * ``None`` : Defaults to ``'cython'`` or the global setting ``compute.use_numba``
+
+engine_kwargs : dict, default None
+    * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+    * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+      and ``parallel`` dictionary keys. The values must either be ``True`` or
+      ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+      ``{'nopython': True, 'nogil': False, 'parallel': False}`` and will be
+      applied to the function
+
+**kwargs
+    Keyword arguments to be passed into func.
+
+Returns
+-------
+%(klass)s
+    %(klass)s with the same indexes as the original object filled
+    with transformed values.
+
+See Also
+--------
+%(klass)s.groupby.apply : Apply function ``func`` group-wise and combine
+    the results together.
+%(klass)s.groupby.aggregate : Aggregate using one or more operations.
+%(klass)s.transform : Call ``func`` on self producing a %(klass)s with the
+    same axis shape as self.
+
+Notes
+-----
+Each group is endowed the attribute 'name' in case you need to know
+which group you are working on.
+
+The current implementation imposes three requirements on f:
+
+* f must return a value that either has the same shape as the input
+  subframe or can be broadcast to the shape of the input subframe.
+  For example, if `f` returns a scalar it will be broadcast to have the
+  same shape as the input subframe.
+* if this is a DataFrame, f must support application column-by-column
+  in the subframe. If f also supports application to the entire subframe,
+  then a fast path is used starting from the second chunk.
+* f must not mutate groups. Mutation is not supported and may
+  produce unexpected results. See :ref:`gotchas.udf-mutation` for more details.
+
+When using ``engine='numba'``, there will be no "</span><span style="color: navy;">fall</span>&nbsp;<span style="color: navy;">back</span><span style="color: green;">" behavior internally.
+The group data and group index will be passed as numpy arrays to the JITed
+user defined function, and no alternative execution attempts will be tried.
+
+.. versionchanged:: 1.3.0
+
+    The resulting dtype will reflect the return value of the passed ``func``,
+    see the examples below.
+
+.. versionchanged:: 2.0.0
+
+    When using ``.transform`` on a grouped DataFrame and the transformation function
+    returns a DataFrame, pandas now aligns the result's index
+    with the input's index. You can call ``.to_numpy()`` on the
+    result of the transformation function to avoid alignment.
+
+Examples
+--------
+%(example)s"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_agg_template_series</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Aggregate using one or more operations.
+
+Parameters
+----------
+func : function, str, list, dict or None
+    Function to use for aggregating the data. If a function, must either
+    work when passed a {klass} or when passed to {klass}.apply.
+
+    Accepted combinations are:
+
+    - function
+    - string function name
+    - list of functions and/or function names, e.g. ``[np.sum, 'mean']``
+    - None, in which case ``**kwargs`` are used with Named Aggregation. Here the
+      output has one column for each element in ``**kwargs``. The name of the
+      column is keyword, whereas the value determines the aggregation used to compute
+      the values in the column.
+
+      Can also accept a Numba JIT function with
+      ``engine='numba'`` specified. Only passing a single function is supported
+      with this engine.
+
+      If the ``'numba'`` engine is chosen, the function must be
+      a user defined function with ``values`` and ``index`` as the
+      first and second arguments respectively in the function signature.
+      Each group's index will be passed to the user defined function
+      and optionally available for use.
+
+    .. deprecated:: 2.1.0
+
+        Passing a dictionary is deprecated and will raise in a future version
+        of pandas. Pass a list of aggregations instead.
+*args
+    Positional arguments to pass to func.
+engine : str, default None
+    * ``'cython'`` : Runs the function through C-extensions from cython.
+    * ``'numba'`` : Runs the function through JIT compiled code from numba.
+    * ``None`` : Defaults to ``'cython'`` or globally setting ``compute.use_numba``
+
+engine_kwargs : dict, default None
+    * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+    * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+      and ``parallel`` dictionary keys. The values must either be ``True`` or
+      ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+      ``{{'nopython': True, 'nogil': False, 'parallel': False}}`` and will be
+      applied to the function
+
+**kwargs
+    * If ``func`` is None, ``**kwargs`` are used to define the output names and
+      aggregations via Named Aggregation. See ``func`` entry.
+    * Otherwise, keyword arguments to be passed into func.
+
+Returns
+-------
+{klass}
+
+See Also
+--------
+{klass}.groupby.apply : Apply function func group-wise
+    and combine the results together.
+{klass}.groupby.transform : Transforms the Series on each group
+    based on the given function.
+{klass}.aggregate : Aggregate using one or more operations.
+
+Notes
+-----
+When using ``engine='numba'``, there will be no "</span><span style="color: navy;">fall</span>&nbsp;<span style="color: navy;">back</span><span style="color: green;">" behavior internally.
+The group data and group index will be passed as numpy arrays to the JITed
+user defined function, and no alternative execution attempts will be tried.
+
+Functions that mutate the passed object can produce unexpected
+behavior or errors and are not supported. See :ref:`gotchas.udf-mutation`
+for more details.
+
+.. versionchanged:: 1.3.0
+
+    The resulting dtype will reflect the return value of the passed ``func``,
+    see the examples below.
+{examples}"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_agg_template_frame</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Aggregate using one or more operations.
+
+Parameters
+----------
+func : function, str, list, dict or None
+    Function to use for aggregating the data. If a function, must either
+    work when passed a {klass} or when passed to {klass}.apply.
+
+    Accepted combinations are:
+
+    - function
+    - string function name
+    - list of functions and/or function names, e.g. ``[np.sum, 'mean']``
+    - dict of index labels -> functions, function names or list of such.
+    - None, in which case ``**kwargs`` are used with Named Aggregation. Here the
+      output has one column for each element in ``**kwargs``. The name of the
+      column is keyword, whereas the value determines the aggregation used to compute
+      the values in the column.
+
+      Can also accept a Numba JIT function with
+      ``engine='numba'`` specified. Only passing a single function is supported
+      with this engine.
+
+      If the ``'numba'`` engine is chosen, the function must be
+      a user defined function with ``values`` and ``index`` as the
+      first and second arguments respectively in the function signature.
+      Each group's index will be passed to the user defined function
+      and optionally available for use.
+
+*args
+    Positional arguments to pass to func.
+engine : str, default None
+    * ``'cython'`` : Runs the function through C-extensions from cython.
+    * ``'numba'`` : Runs the function through JIT compiled code from numba.
+    * ``None`` : Defaults to ``'cython'`` or globally setting ``compute.use_numba``
+
+engine_kwargs : dict, default None
+    * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+    * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+      and ``parallel`` dictionary keys. The values must either be ``True`` or
+      ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+      ``{{'nopython': True, 'nogil': False, 'parallel': False}}`` and will be
+      applied to the function
+
+**kwargs
+    * If ``func`` is None, ``**kwargs`` are used to define the output names and
+      aggregations via Named Aggregation. See ``func`` entry.
+    * Otherwise, keyword arguments to be passed into func.
+
+Returns
+-------
+{klass}
+
+See Also
+--------
+{klass}.groupby.apply : Apply function func group-wise
+    and combine the results together.
+{klass}.groupby.transform : Transforms the Series on each group
+    based on the given function.
+{klass}.aggregate : Aggregate using one or more operations.
+
+Notes
+-----
+When using ``engine='numba'``, there will be no "</span><span style="color: navy;">fall</span>&nbsp;<span style="color: navy;">back</span><span style="color: green;">" behavior internally.
+The group data and group index will be passed as numpy arrays to the JITed
+user defined function, and no alternative execution attempts will be tried.
+
+Functions that mutate the passed object can produce unexpected
+behavior or errors and are not supported. See :ref:`gotchas.udf-mutation`
+for more details.
+
+.. versionchanged:: 1.3.0
+
+    The resulting dtype will reflect the return value of the passed ``func``,
+    see the examples below.
+{examples}"</span><span style="color: green;">""</span><br><br><br>
+</pre></body>
+</html>

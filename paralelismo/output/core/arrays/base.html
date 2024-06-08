@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"
+An interface for extending pandas with custom arrays.
+
+.. warning::
+
+   This is an experimental API and subject to breaking changes
+   without warning.
+"</span><span style="color: green;">""</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">operator</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Any</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Callable</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ClassVar</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Literal</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">cast</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">overload</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">warnings</span><br><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">np</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">algos</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">libalgos</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">lib</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">compat</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">set_function_name</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">compat</span><span style="color: brown;">.</span><span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">function</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">nv</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">errors</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">AbstractMethodError</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">_decorators</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Appender</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Substitution</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">cache_readonly</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">_exceptions</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">find_stack_level</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">util</span><span style="color: brown;">.</span><span style="color: navy;">_validators</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">validate_bool_kwarg</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">validate_insert_loc</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">cast</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">maybe_cast_pointwise_result</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">common</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_list_like</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">is_scalar</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">pandas_dtype</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">ExtensionDtype</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">generic</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCDataFrame</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCIndex</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCSeries</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">isna</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">arraylike</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">missing</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">roperator</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">algorithms</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">duplicated</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">factorize_array</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">isin</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">map_array</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">mode</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">rank</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">unique</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">array_algos</span><span style="color: brown;">.</span><span style="color: navy;">quantile</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">quantile_with_mask</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">_fill_limit_area_1d</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">sorting</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">nargminmax</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">nargsort</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">if</span>&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">collections</span><span style="color: brown;">.</span><span style="color: navy;">abc</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Iterator</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Sequence</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">NAType</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ArrayLike</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">AstypeArg</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">AxisInt</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Dtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">DtypeObj</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">FillnaOptions</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">InterpolateOptions</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">NumpySorter</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">NumpyValueArrayLike</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">PositionalIndexer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ScalarIndexer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Self</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">SequenceIndexer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Shape</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">SortKind</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TakeIndexer</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">npt</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">Index</span><br><br><span style="color: navy;">_extension_array_shared_docs</span><span style="color: brown;">:</span>&nbsp;<span style="color: olive;">dict</span><span style="color: brown;">[</span><span style="color: navy;">str</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">]</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">{</span><span style="color: brown;">}</span><br><br><br><span style="color: purple;">class</span>&nbsp;<span style="color: navy;">ExtensionArray</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    Abstract base class for custom 1-D array types.
+
+    pandas will recognize instances of this class as proper arrays
+    with a custom type and will not attempt to coerce them to objects. They
+    may be stored directly inside a :class:`DataFrame` or :class:`Series`.
+
+    Attributes
+    ----------
+    dtype
+    nbytes
+    ndim
+    shape
+
+    Methods
+    -------
+    argsort
+    astype
+    copy
+    dropna
+    duplicated
+    factorize
+    fillna
+    equals
+    insert
+    interpolate
+    isin
+    isna
+    ravel
+    repeat
+    searchsorted
+    shift
+    take
+    tolist
+    unique
+    view
+    _accumulate
+    _concat_same_type
+    _explode
+    _formatter
+    _from_factorized
+    _from_sequence
+    _from_sequence_of_strings
+    _hash_pandas_object
+    _pad_or_backfill
+    _reduce
+    _values_for_argsort
+    _values_for_factorize
+
+    See Also
+    --------
+    api.extensions.ExtensionDtype : A custom data type, to be paired with an
+        ExtensionArray.
+    api.extensions.ExtensionArray.dtype : An instance of ExtensionDtype.
+
+    Notes
+    -----
+    The interface includes the following abstract methods that must be
+    implemented by subclasses:
+
+    * _from_sequence
+    * _from_factorized
+    * __getitem__
+    * __len__
+    * __eq__
+    * dtype
+    * nbytes
+    * isna
+    * take
+    * copy
+    * _concat_same_type
+    * interpolate
+
+    A default repr displaying the type, (truncated) data, length,
+    and dtype is provided. It can be customized or replaced by
+    by overriding:
+
+    * __repr__ : A default repr for the ExtensionArray.
+    * _formatter : Print scalars inside a Series or DataFrame.
+
+    Some methods require casting the ExtensionArray to an ndarray of Python
+    objects with ``self.astype(object)``, which may be expensive. When
+    performance is a concern, we highly recommend overriding the following
+    methods:
+
+    * fillna
+    * _pad_or_backfill
+    * dropna
+    * unique
+    * factorize / _values_for_factorize
+    * argsort, argmax, argmin / _values_for_argsort
+    * searchsorted
+    * map
+
+    The remaining methods implemented on this class should be performant,
+    as they only compose abstract methods. Still, a more efficient
+    implementation may be available, and these methods can be overridden.
+
+    One can implement methods to handle array accumulations or reductions.
+
+    * _accumulate
+    * _reduce
+
+    One can implement methods to handle parsing from strings that will be used
+    in methods such as ``pandas.io.parsers.read_csv``.
+
+    * _from_sequence_of_strings
+
+    This class does not inherit from 'abc.ABCMeta' for performance reasons.
+    Methods and properties required by the interface raise
+    ``pandas.errors.AbstractMethodError`` and no ``register`` method is
+    provided for registering virtual subclasses.
+
+    ExtensionArrays are limited to 1 dimension.
+
+    They may be backed by none, one, or many NumPy arrays. For example,
+    ``pandas.Categorical`` is an extension array backed by two arrays,
+    one for codes and one for categories. An array of IPv6 address may
+    be backed by a NumPy structured array with two fields, one for the
+    lower 64 bits and one for the upper 64 bits. Or they may be backed
+    by some other storage type, like Python lists. Pandas makes no
+    assumptions on how the data are stored, just that it can be converted
+    to a NumPy array.
+    The ExtensionArray interface does not impose any rules on how this data
+    is stored. However, currently, the backing data cannot be stored in
+    attributes called ``.values`` or ``._values`` to ensure full compatibility
+    with pandas internals. But other names as ``.data``, ``._data``,
+    ``._items``, ... can be freely used.
+
+    If implementing NumPy's ``__array_ufunc__`` interface, pandas expects
+    that
+
+    1. You defer by returning ``NotImplemented`` when any Series are present
+       in `inputs`. Pandas will extract the arrays and call the ufunc again.
+    2. You define a ``_HANDLED_TYPES`` tuple as an attribute on the class.
+       Pandas inspect this to determine whether the ufunc is valid for the
+       types present.
+
+    See :ref:`extending.extension.ufunc` for more.
+
+    By default, ExtensionArrays are not hashable.  Immutable subclasses may
+    override this behavior.
+
+    Examples
+    --------
+    Please see the following:
+
+    https://github.com/pandas-dev/pandas/blob/main/pandas/tests/extension/list/array.py
+    "</span><span style="color: green;">""</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># '_typ' is for pandas.core.dtypes.generic.ABCExtensionArray.</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># Don't override this.</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_typ</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">"extension"</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># similar to __array_priority__, positions ExtensionArray after Index,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;">#  Series, and DataFrame.  EA subclasses may override to choose which EA</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;">#  subclass takes priority. If overriding, the value should always be</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;">#  strictly less than 2000 to be below Index.__pandas_priority__.</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">__pandas_priority__</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: blue;">1000</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># ------------------------------------------------------------------------</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># Constructors</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># ------------------------------------------------------------------------</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;
+</pre></body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"Any shareable docstring components for rolling/expanding/ewm"</span><span style="color: green;">""</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">textwrap</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">dedent</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">shared_docs</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">_shared_docs</span><br><br><span style="color: navy;">_shared_docs</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dict</span><span style="color: brown;">(</span><span style="color: orange;">**</span><span style="color: navy;">_shared_docs</span><span style="color: brown;">)</span><br><br><br><span style="color: purple;">def</span>&nbsp;<span style="color: olive;">create_section_header</span><span style="color: brown;">(</span><span style="color: navy;">header</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"Create numpydoc section header"</span><span style="color: green;">""</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: navy;">f</span><span style="color: green;">"{header}\n{'-' * len(header)}\n"</span><br><br><br><span style="color: navy;">template_header</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">"\nCalculate the {window_method} {aggregation_description}.\n\n"</span><br><br><span style="color: navy;">template_returns</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    Series or DataFrame
+        Return type is the same as the original object with ``np.float64`` dtype.\n
+    "</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br><br><span style="color: navy;">template_see_also</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    Series.{window_method} : Calling {window_method} with Series data.
+    DataFrame.{window_method} : Calling {window_method} with DataFrames.
+    Series.{agg_method} : Aggregating {agg_method} for Series.
+    DataFrame.{agg_method} : Aggregating {agg_method} for DataFrame.\n
+    "</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br><br><span style="color: navy;">kwargs_numeric_only</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    numeric_only : bool, default False
+        Include only float, int, boolean columns.
+
+        .. versionadded:: 1.5.0\n
+    "</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br><br><span style="color: navy;">kwargs_scipy</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    **kwargs
+        Keyword arguments to configure the ``SciPy`` weighted window type.\n
+    "</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br><br><span style="color: navy;">window_apply_parameters</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    func : function
+        Must produce a single value from an ndarray input if ``raw=True``
+        or a single value from a Series if ``raw=False``. Can also accept a
+        Numba JIT function with ``engine='numba'`` specified.
+
+    raw : bool, default False
+        * ``False`` : passes each row or column as a Series to the
+          function.
+        * ``True`` : the passed function will receive ndarray
+          objects instead.
+          If you are just applying a NumPy reduction function this will
+          achieve much better performance.
+
+    engine : str, default None
+        * ``'cython'`` : Runs rolling apply through C-extensions from cython.
+        * ``'numba'`` : Runs rolling apply through JIT compiled code from numba.
+          Only available when ``raw`` is set to ``True``.
+        * ``None`` : Defaults to ``'cython'`` or globally setting ``compute.use_numba``
+
+    engine_kwargs : dict, default None
+        * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+        * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+          and ``parallel`` dictionary keys. The values must either be ``True`` or
+          ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+          ``{{'nopython': True, 'nogil': False, 'parallel': False}}`` and will be
+          applied to both the ``func`` and the ``apply`` rolling aggregation.
+
+    args : tuple, default None
+        Positional arguments to be passed into func.
+
+    kwargs : dict, default None
+        Keyword arguments to be passed into func.\n
+    "</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br><br><span style="color: navy;">numba_notes</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">"See :ref:`window.numba_engine` and :ref:`enhancingperf.numba` for "</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">"extended documentation and performance considerations for the Numba engine.\n\n"</span><br><span style="color: brown;">)</span><br><br><br><span style="color: purple;">def</span>&nbsp;<span style="color: olive;">window_agg_numba_parameters</span><span style="color: brown;">(</span><span style="color: navy;">version</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">str</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">"1.3"</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: olive;">dedent</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    engine : str, default None
+        * ``'cython'`` : Runs the operation through C-extensions from cython.
+        * ``'numba'`` : Runs the operation through JIT compiled code from numba.
+        * ``None`` : Defaults to ``'cython'`` or globally setting ``compute.use_numba``
+
+          .. versionadded:: {version}.0
+
+    engine_kwargs : dict, default None
+        * For ``'cython'`` engine, there are no accepted ``engine_kwargs``
+        * For ``'numba'`` engine, the engine can accept ``nopython``, ``nogil``
+          and ``parallel`` dictionary keys. The values must either be ``True`` or
+          ``False``. The default ``engine_kwargs`` for the ``'numba'`` engine is
+          ``{{'nopython': True, 'nogil': False, 'parallel': False}}``
+
+          .. versionadded:: {version}.0\n
+    "</span><span style="color: green;">""</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"\n"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">,</span>&nbsp;<span style="color: blue;">1</span><span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"{version}"</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">version</span><span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br>&nbsp;
+</pre></body>
+</html>

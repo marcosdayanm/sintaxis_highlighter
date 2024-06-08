@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"
+Templating for ops docstrings
+"</span><span style="color: green;">""</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><br><span style="color: purple;">def</span>&nbsp;<span style="color: olive;">make_flex_doc</span><span style="color: brown;">(</span><span style="color: navy;">op_name</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">typ</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    Make the appropriate substitutions for the given operation and class-typ
+    into either _flex_doc_SERIES or _flex_doc_FRAME to return the docstring
+    to attach to a generated method.
+
+    Parameters
+    ----------
+    op_name : str {'__add__', '__sub__', ... '__eq__', '__ne__', ...}
+    typ : str {series, 'dataframe']}
+
+    Returns
+    -------
+    doc : str
+    "</span><span style="color: green;">""</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_name</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">op_name</span><span style="color: brown;">.</span><span style="color: olive;">replace</span><span style="color: brown;">(</span><span style="color: green;">"__"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">""</span><span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_desc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">_op_descriptions</span><span style="color: brown;">[</span><span style="color: navy;">op_name</span><span style="color: brown;">]</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_desc_op</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"op"</span><span style="color: brown;">]</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">assert</span>&nbsp;<span style="color: navy;">op_desc_op</span>&nbsp;<span style="color: purple;">is</span>&nbsp;<span style="color: purple;">not</span>&nbsp;<span style="color: purple;">None</span>&nbsp;&nbsp;<span style="color: silver;"># for mypy</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: navy;">op_name</span><span style="color: brown;">.</span><span style="color: olive;">startswith</span><span style="color: brown;">(</span><span style="color: green;">"r"</span><span style="color: brown;">)</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">equiv</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">f</span><span style="color: green;">"other {op_desc_op} {typ}"</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">elif</span>&nbsp;<span style="color: navy;">op_name</span>&nbsp;<span style="color: orange;">=</span><span style="color: orange;">=</span>&nbsp;<span style="color: green;">"divmod"</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">equiv</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">f</span><span style="color: green;">"{op_name}({typ}, other)"</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">else</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">equiv</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">f</span><span style="color: green;">"{typ} {op_desc_op} other"</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: navy;">typ</span>&nbsp;<span style="color: orange;">=</span><span style="color: orange;">=</span>&nbsp;<span style="color: green;">"series"</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">base_doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">_flex_doc_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"reverse"</span><span style="color: brown;">]</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">base_doc</span>&nbsp;<span style="color: orange;">+</span><span style="color: orange;">=</span>&nbsp;<span style="color: navy;">_see_also_reverse_SERIES</span><span style="color: brown;">.</span><span style="color: olive;">format</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">reverse</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"reverse"</span><span style="color: brown;">]</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">see_also_desc</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"see_also_desc"</span><span style="color: brown;">]</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc_no_examples</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">base_doc</span><span style="color: brown;">.</span><span style="color: olive;">format</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">desc</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"desc"</span><span style="color: brown;">]</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_name</span><span style="color: orange;">=</span><span style="color: navy;">op_name</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">equiv</span><span style="color: orange;">=</span><span style="color: navy;">equiv</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">series_returns</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"series_returns"</span><span style="color: brown;">]</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ser_example</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"series_examples"</span><span style="color: brown;">]</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: navy;">ser_example</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">doc_no_examples</span>&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: navy;">ser_example</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">else</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">doc_no_examples</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">elif</span>&nbsp;<span style="color: navy;">typ</span>&nbsp;<span style="color: orange;">=</span><span style="color: orange;">=</span>&nbsp;<span style="color: green;">"dataframe"</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: navy;">op_name</span>&nbsp;<span style="color: purple;">in</span>&nbsp;<span style="color: brown;">[</span><span style="color: green;">"eq"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">"ne"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">"le"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">"lt"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">"ge"</span><span style="color: brown;">,</span>&nbsp;<span style="color: green;">"gt"</span><span style="color: brown;">]</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">base_doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">_flex_comp_doc_FRAME</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">_flex_comp_doc_FRAME</span><span style="color: brown;">.</span><span style="color: olive;">format</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_name</span><span style="color: orange;">=</span><span style="color: navy;">op_name</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">desc</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"desc"</span><span style="color: brown;">]</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">else</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">base_doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">_flex_doc_FRAME</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">doc</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">base_doc</span><span style="color: brown;">.</span><span style="color: olive;">format</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">desc</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"desc"</span><span style="color: brown;">]</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">op_name</span><span style="color: orange;">=</span><span style="color: navy;">op_name</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">equiv</span><span style="color: orange;">=</span><span style="color: navy;">equiv</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">reverse</span><span style="color: orange;">=</span><span style="color: olive;">op_desc</span><span style="color: brown;">[</span><span style="color: green;">"reverse"</span><span style="color: brown;">]</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">else</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">raise</span>&nbsp;<span style="color: purple;">AssertionError</span><span style="color: brown;">(</span><span style="color: green;">"Invalid typ argument."</span><span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: navy;">doc</span><br><br><br><span style="color: navy;">_common_examples_algebra_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Examples
+--------
+>>> a = pd.Series([1, 1, 1, np.nan], index=['a', 'b', 'c', 'd'])
+>>> a
+a    1.0
+b    1.0
+c    1.0
+d    NaN
+dtype: float64
+>>> b = pd.Series([1, np.nan, 1, np.nan], index=['a', 'b', 'd', 'e'])
+>>> b
+a    1.0
+b    NaN
+d    1.0
+e    NaN
+dtype: float64"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_common_examples_comparison_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+Examples
+--------
+>>> a = pd.Series([1, 1, 1, np.nan, 1], index=['a', 'b', 'c', 'd', 'e'])
+>>> a
+a    1.0
+b    1.0
+c    1.0
+d    NaN
+e    1.0
+dtype: float64
+>>> b = pd.Series([0, 1, 2, np.nan, 1], index=['a', 'b', 'c', 'd', 'f'])
+>>> b
+a    0.0
+b    1.0
+c    2.0
+d    NaN
+f    1.0
+dtype: float64"</span><span style="color: green;">""</span><br><br><span style="color: navy;">_add_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.add(b, fill_value=0)
+a    2.0
+b    1.0
+c    1.0
+d    1.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_sub_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.subtract(b, fill_value=0)
+a    0.0
+b    1.0
+c    1.0
+d   -1.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_mul_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.multiply(b, fill_value=0)
+a    1.0
+b    0.0
+c    0.0
+d    0.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_div_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.divide(b, fill_value=0)
+a    1.0
+b    inf
+c    inf
+d    0.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_floordiv_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.floordiv(b, fill_value=0)
+a    1.0
+b    inf
+c    inf
+d    0.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_divmod_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.divmod(b, fill_value=0)
+(a    1.0
+ b    inf
+ c    inf
+ d    0.0
+ e    NaN
+ dtype: float64,
+ a    0.0
+ b    NaN
+ c    NaN
+ d    0.0
+ e    NaN
+ dtype: float64)
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_mod_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.mod(b, fill_value=0)
+a    0.0
+b    NaN
+c    NaN
+d    0.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><span style="color: navy;">_pow_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.pow(b, fill_value=0)
+a    1.0
+b    1.0
+c    1.0
+d    0.0
+e    NaN
+dtype: float64
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_ne_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.ne(b, fill_value=0)
+a    False
+b     True
+c     True
+d     True
+e     True
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_eq_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_algebra_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.eq(b, fill_value=0)
+a     True
+b    False
+c    False
+d    False
+e    False
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_lt_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_comparison_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.lt(b, fill_value=0)
+a    False
+b    False
+c     True
+d    False
+e    False
+f     True
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_le_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_comparison_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.le(b, fill_value=0)
+a    False
+b     True
+c     True
+d    False
+e    False
+f     True
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_gt_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_comparison_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.gt(b, fill_value=0)
+a     True
+b    False
+c    False
+d    False
+e     True
+f    False
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_ge_example_SERIES</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_common_examples_comparison_SERIES</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: orange;">+</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+>>> a.ge(b, fill_value=0)
+a     True
+b     True
+c    False
+d    False
+e     True
+f    False
+dtype: bool
+"</span><span style="color: green;">""</span><br><span style="color: brown;">)</span><br><br><span style="color: navy;">_returns_series</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"Series\n    The result of the operation."</span><span style="color: green;">""</span><br><br><span style="color: navy;">_returns_tuple</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: green;">""</span><span style="color: green;">"2-Tuple of Series\n    The result of the operation."</span><span style="color: green;">""</span><br><br><span style="color: navy;">_op_descriptions</span><span style="color: brown;">:</span>&nbsp;<span style="color: olive;">dict</span><span style="color: brown;">[</span><span style="color: navy;">str</span><span style="color: brown;">,</span>&nbsp;<span style="color: olive;">dict</span><span style="color: brown;">[</span><span style="color: navy;">str</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">str</span>&nbsp;
+</pre></body>
+</html>

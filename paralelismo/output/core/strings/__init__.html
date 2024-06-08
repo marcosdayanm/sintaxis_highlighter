@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"
+Implementation of pandas.Series.str and its interface.
+
+* strings.accessor.StringMethods : Accessor for Series.str
+* strings.base.BaseStringArrayMethods: Mixin ABC for EAs to implement str methods
+
+Most methods on the StringMethods accessor follow the pattern:
+
+    1. extract the array from the series (or index)
+    2. Call that array's implementation of the string method
+    3. Wrap the result (in a Series, index, or DataFrame)
+
+Pandas extension arrays implementing string methods should inherit from
+pandas.core.strings.base.BaseStringArrayMethods. This is an ABC defining
+the various string methods. To avoid namespace clashes and pollution,
+these are prefixed with `_str_`. So ``Series.str.upper()`` calls
+``Series.array._str_upper()``. The interface isn't currently public
+to other string extension arrays.
+"</span><span style="color: green;">""</span><br><span style="color: silver;"># Pandas current implementation is in ObjectStringArrayMixin. This is designed</span><br><span style="color: silver;"># to work on object-dtype ndarrays.</span><br><span style="color: silver;">#</span><br><span style="color: silver;"># BaseStringArrayMethods</span><br><span style="color: silver;">#  - ObjectStringArrayMixin</span><br><span style="color: silver;">#     - StringArray</span><br><span style="color: silver;">#     - NumpyExtensionArray</span><br><span style="color: silver;">#     - Categorical</span><br><span style="color: silver;">#     - ArrowStringArray</span><br><br>&nbsp;
+</pre></body>
+</html>

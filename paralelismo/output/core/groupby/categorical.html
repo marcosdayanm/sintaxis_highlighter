@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">np</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">algorithms</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">unique1d</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">arrays</span><span style="color: brown;">.</span><span style="color: navy;">categorical</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Categorical</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">CategoricalDtype</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">recode_for_categories</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><br><span style="color: purple;">def</span>&nbsp;<span style="color: olive;">recode_for_groupby</span><span style="color: brown;">(</span><span style="color: navy;">c</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">Categorical</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">sort</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">bool</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">observed</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">bool</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">Categorical</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    Code the categories to ensure we can groupby for categoricals.
+
+    If observed=True, we return a new Categorical with the observed
+    categories only.
+
+    If sort=False, return a copy of self, coded with categories as
+    returned by .unique(), followed by any categories not appearing in
+    the data. If sort=True, return self.
+
+    This method is needed solely to ensure the categorical index of the
+    GroupBy result has categories in the order of appearance in the data
+    (GH-8868).
+
+    Parameters
+    ----------
+    c : Categorical
+    sort : bool
+        The value of the sort parameter groupby was called with.
+    observed : bool
+        Account only for the observed values
+
+    Returns
+    -------
+    Categorical
+        If sort=False, the new categories are set to the order of
+        appearance in codes (unless ordered=True, in which case the
+        original order is preserved), followed by any unrepresented
+        categories in the original order.
+    "</span><span style="color: green;">""</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># we only care about observed values</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: navy;">observed</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># In cases with c.ordered, this is equivalent to</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;">#  return c.remove_unused_categories(), c</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">unique_codes</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">unique1d</span><span style="color: brown;">(</span><span style="color: navy;">c</span><span style="color: brown;">.</span><span style="color: navy;">codes</span><span style="color: brown;">)</span>&nbsp;&nbsp;<span style="color: silver;"># type: ignore[no-untyped-call]</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">take_codes</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">unique_codes</span><span style="color: brown;">[</span><span style="color: navy;">unique_codes</span>&nbsp;
+</pre></body>
+</html>

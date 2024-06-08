@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Highlighted Code</title>
+</head>
+<body>
+<div><h2>Guía de Colores</h2><ul><li><span style="color: red;">Error</span></li><li><span style="color: blue;">Numbers</span></li><li><span style="color: orange;">Operators</span></li><li><span style="color: navy;">Variables</span></li><li><span style="color: olive;">Functions</span></li><li><span style="color: purple;">Reserved</span></li><li><span style="color: green;">String</span></li><li><span style="color: silver;">Comments</span></li><li><span style="color: brown;">Keys_brackets_punctuation</span></li><li><span style="color: black;">Format</span></li></ul></div><hr><pre>
+<span style="color: green;">""</span><span style="color: green;">"
+Extend pandas with custom array types.
+"</span><span style="color: green;">""</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">__future__</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">annotations</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Any</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">TypeVar</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">cast</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">overload</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">import</span>&nbsp;<span style="color: navy;">numpy</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">np</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">missing</span>&nbsp;<span style="color: purple;">as</span>&nbsp;<span style="color: navy;">libmissing</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">hashtable</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">object_hash</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_libs</span><span style="color: brown;">.</span><span style="color: navy;">properties</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">cache_readonly</span><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">errors</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">AbstractMethodError</span><br><br><span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">dtypes</span><span style="color: brown;">.</span><span style="color: navy;">generic</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCDataFrame</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCIndex</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ABCSeries</span><span style="color: brown;">,</span><br><span style="color: brown;">)</span><br><br><span style="color: purple;">if</span>&nbsp;<span style="color: navy;">TYPE_CHECKING</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">_typing</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">DtypeObj</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Self</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">Shape</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">npt</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">type_t</span><span style="color: brown;">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">Index</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">from</span>&nbsp;<span style="color: navy;">pandas</span><span style="color: brown;">.</span><span style="color: navy;">core</span><span style="color: brown;">.</span><span style="color: navy;">arrays</span>&nbsp;<span style="color: purple;">import</span>&nbsp;<span style="color: navy;">ExtensionArray</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># To parameterize on same ExtensionDtype</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">ExtensionDtypeT</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: olive;">TypeVar</span><span style="color: brown;">(</span><span style="color: green;">"ExtensionDtypeT"</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">bound</span><span style="color: orange;">=</span><span style="color: green;">"ExtensionDtype"</span><span style="color: brown;">)</span><br><br><br><span style="color: purple;">class</span>&nbsp;<span style="color: navy;">ExtensionDtype</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+    A custom data type, to be paired with an ExtensionArray.
+
+    See Also
+    --------
+    extensions.register_extension_dtype: Register an ExtensionType
+        with pandas as class decorator.
+    extensions.ExtensionArray: Abstract base class for custom 1-D array types.
+
+    Notes
+    -----
+    The interface includes the following abstract methods that must
+    be implemented by subclasses:
+
+    * type
+    * name
+    * construct_array_type
+
+    The following attributes and methods influence the behavior of the dtype in
+    pandas operations
+
+    * _is_numeric
+    * _is_boolean
+    * _get_common_dtype
+
+    The `na_value` class attribute can be used to set the default NA value
+    for this type. :attr:`numpy.nan` is used by default.
+
+    ExtensionDtypes are required to be hashable. The base class provides
+    a default implementation, which relies on the ``_metadata`` class
+    attribute. ``_metadata`` should be a tuple containing the strings
+    that define your data type. For example, with ``PeriodDtype`` that's
+    the ``freq`` attribute.
+
+    **If you have a parametrized dtype you should set the ``_metadata``
+    class property**.
+
+    Ideally, the attributes in ``_metadata`` will match the
+    parameters to your ``ExtensionDtype.__init__`` (if any). If any of
+    the attributes in ``_metadata`` don't implement the standard
+    ``__eq__`` or ``__hash__``, the default implementations here will not
+    work.
+
+    Examples
+    --------
+
+    For interaction with Apache Arrow (pyarrow), a ``__from_arrow__`` method
+    can be implemented: this method receives a pyarrow Array or ChunkedArray
+    as only argument and is expected to return the appropriate pandas
+    ExtensionArray for this dtype and the passed values:
+
+    >>> import pyarrow
+    >>> from pandas.api.extensions import ExtensionArray
+    >>> class ExtensionDtype:
+    ...     def __from_arrow__(
+    ...         self, array: pyarrow.Array | pyarrow.ChunkedArray
+    ...     ) -> ExtensionArray: ...
+
+    This class does not inherit from 'abc.ABCMeta' for performance reasons.
+    Methods and properties required by the interface raise
+    ``pandas.errors.AbstractMethodError`` and no ``register`` method is
+    provided for registering virtual subclasses.
+    "</span><span style="color: green;">""</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">_metadata</span><span style="color: brown;">:</span>&nbsp;<span style="color: olive;">tuple</span><span style="color: brown;">[</span><span style="color: navy;">str</span><span style="color: brown;">,</span>&nbsp;<span style="color: brown;">.</span><span style="color: brown;">.</span><span style="color: brown;">.</span><span style="color: brown;">]</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: brown;">(</span><span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">def</span>&nbsp;<span style="color: purple;">__str__</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: navy;">self</span><span style="color: brown;">.</span><span style="color: navy;">name</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">def</span>&nbsp;<span style="color: purple;">__eq__</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">other</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">object</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">bool</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">""</span><span style="color: green;">"
+        Check whether 'other' is equal to self.
+
+        By default, 'other' is considered equal if either
+
+        * it's a string matching 'self.name'.
+        * it's an instance of this type and all of the attributes
+          in ``self._metadata`` are equal between `self` and `other`.
+
+        Parameters
+        ----------
+        other : Any
+
+        Returns
+        -------
+        bool
+        "</span><span style="color: green;">""</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: olive;">isinstance</span><span style="color: brown;">(</span><span style="color: navy;">other</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">str</span><span style="color: brown;">)</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">try</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: navy;">other</span>&nbsp;<span style="color: orange;">=</span>&nbsp;<span style="color: navy;">self</span><span style="color: brown;">.</span><span style="color: olive;">construct_from_string</span><span style="color: brown;">(</span><span style="color: navy;">other</span><span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">except</span>&nbsp;<span style="color: purple;">TypeError</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: purple;">False</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">if</span>&nbsp;<span style="color: olive;">isinstance</span><span style="color: brown;">(</span><span style="color: navy;">other</span><span style="color: brown;">,</span>&nbsp;<span style="color: olive;">type</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">)</span><span style="color: brown;">)</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: olive;">all</span><span style="color: brown;">(</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: olive;">getattr</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">attr</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">=</span><span style="color: orange;">=</span>&nbsp;<span style="color: olive;">getattr</span><span style="color: brown;">(</span><span style="color: navy;">other</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">attr</span><span style="color: brown;">)</span>&nbsp;<span style="color: purple;">for</span>&nbsp;<span style="color: navy;">attr</span>&nbsp;<span style="color: purple;">in</span>&nbsp;<span style="color: navy;">self</span><span style="color: brown;">.</span><span style="color: navy;">_metadata</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: brown;">)</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: purple;">False</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">def</span>&nbsp;<span style="color: purple;">__hash__</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">int</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># for python>=3.10, different nan objects have different hashes</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: silver;"># we need to avoid that and thus use hash function with old behavior</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: olive;">object_hash</span><span style="color: brown;">(</span><span style="color: olive;">tuple</span><span style="color: brown;">(</span><span style="color: olive;">getattr</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">attr</span><span style="color: brown;">)</span>&nbsp;<span style="color: purple;">for</span>&nbsp;<span style="color: navy;">attr</span>&nbsp;<span style="color: purple;">in</span>&nbsp;<span style="color: navy;">self</span><span style="color: brown;">.</span><span style="color: navy;">_metadata</span><span style="color: brown;">)</span><span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">def</span>&nbsp;<span style="color: purple;">__ne__</span><span style="color: brown;">(</span><span style="color: navy;">self</span><span style="color: brown;">,</span>&nbsp;<span style="color: navy;">other</span><span style="color: brown;">:</span>&nbsp;<span style="color: navy;">object</span><span style="color: brown;">)</span>&nbsp;<span style="color: orange;">-</span><span style="color: orange;">></span>&nbsp;<span style="color: navy;">bool</span><span style="color: brown;">:</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: purple;">return</span>&nbsp;<span style="color: purple;">not</span>&nbsp;<span style="color: navy;">self</span><span style="color: brown;">.</span><span style="color: purple;">__eq__</span><span style="color: brown;">(</span><span style="color: navy;">other</span><span style="color: brown;">)</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;
+</pre></body>
+</html>
