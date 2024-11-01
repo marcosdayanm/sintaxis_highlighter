@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Input files
+input/
+./paralelismo/input/
+
 # C extensions
 *.so
 
